@@ -13,9 +13,9 @@ class YOLO:
             obj_threshold: Integer, threshold for object.
             nms_threshold: Integer, threshold for box.
         """
-        self._t1 = obj_threshold
-        self._t2 = nms_threshold
-        self._yolo = load_model('data/yolo.h5')
+        self.obj_threshold = obj_threshold
+        self.nms_threshold = nms_threshold
+        self._yolo = load_model('data/yolo.h5', compile=False)
     def _sigmoid(self,x):
         return 1 / (1 + np.exp(-x))
     def _process_feats(self, out, anchors, mask):
@@ -74,7 +74,7 @@ class YOLO:
         box_scores = box_confidences * box_class_probs
         box_classes = np.argmax(box_scores, axis=-1)
         box_class_scores = np.max(box_scores, axis=-1)
-        pos = np.where(box_class_scores >= self._t1)
+        pos = np.where(box_class_scores >= self.obj_threshold)
 
         boxes = boxes[pos]
         classes = box_classes[pos]
@@ -115,7 +115,7 @@ class YOLO:
             inter = w1 * h1
 
             ovr = inter / (areas[i] + areas[order[1:]] - inter)
-            inds = np.where(ovr <= self._t2)[0]
+            inds = np.where(ovr <= self.nms_threshold)[0]
             order = order[inds + 1]
 
         keep = np.array(keep)
@@ -134,9 +134,9 @@ class YOLO:
             classes: ndarray, classes of objects.
             scores: ndarray, scores of objects.
         """
-        masks = [[6, 7, 8], [3, 4, 5], [0, 1, 2]]
-        anchors = [[10, 13], [16, 30], [33, 23], [30, 61], [62, 45],
-                   [59, 119], [116, 90], [156, 198], [373, 326]]
+        masks = [[3, 4, 5], [0, 1, 2]]
+        anchors = [[10, 14], [23, 27], [37, 58], [81, 82], [135, 169],
+                   [344, 319]]
 
         boxes, classes, scores = [], [], []
 
