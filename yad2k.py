@@ -76,8 +76,11 @@ def _main(args):
     # Load weights and config.
     print('Loading weights.')
     weights_file = open(weights_path, 'rb')
-    weights_header = np.ndarray(
-        shape=(4, ), dtype='int32', buffer=weights_file.read(16))
+    # Darknet Check1
+    # TODO: modify weights_header, in-house model always "seen 32"
+    # if darknet print "seen 32" -> weights_header = np.ndarray(shape=(4, ), dtype='int32', buffer=weights_file.read(16))
+    # if darknet print "seen 64" -> weights_header = np.ndarray(shape=(5, ), dtype='int32', buffer=weights_file.read(20))
+    weights_header = np.ndarray(shape=(4, ), dtype='int32', buffer=weights_file.read(16))
     print('Weights Header: ', weights_header)
     # TODO: Check transpose flag when implementing fully connected layers.
     # transpose = (weight_header[0] > 1000) or (weight_header[1] > 1000)
@@ -94,6 +97,9 @@ def _main(args):
         image_height = int(cfg_parser['net_0']['height'])
         image_width = int(cfg_parser['net_0']['width'])
 
+    # Darknet Check3
+    # TODO: modify input channel
+    # if input channel = 1 -> prev_layer = Input(shape=(image_height, image_width, 1))
     prev_layer = Input(shape=(image_height, image_width, 3))
     all_layers = [prev_layer]
     outputs = []
@@ -225,6 +231,9 @@ def _main(args):
 
             layers = [all_layers[i] for i in ids]
 
+            # Darknet Check2
+            # TODO : must check if concatenate layer is positive number in cfg file
+            # for example: correct:(route 28 18), wrong:(route -1 18)
             if len(layers) > 1:
                 print('Concatenating route layers:', layers)
                 concatenate_layer = concatenate(layers)
