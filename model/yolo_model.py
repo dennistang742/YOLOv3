@@ -208,3 +208,7 @@ class YOLO:
         boxes, classes, scores = self._yolo_out(outs, shape)
 
         return boxes, classes, scores
+
+    @property
+    def yolo_input_shape(self):
+        return self._yolo.input_shape

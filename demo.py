@@ -7,7 +7,7 @@ import numpy as np
 from model.yolo_model import YOLO
 
 
-def process_image(img):
+def process_image(img, input_shape):
     """Resize, reduce and expand image.
 
     # Argument:
@@ -16,12 +16,14 @@ def process_image(img):
     # Returns
         image: ndarray(64, 64, 3), processed image.
     """
-    image = cv2.resize(img, (416, 416),
+    image = cv2.resize(img, (input_shape[2], input_shape[1]),
                        interpolation=cv2.INTER_CUBIC)
     image = np.array(image, dtype='float32')
     image /= 255.
     image = np.expand_dims(image, axis=0)
 
+    if input_shape[-1] == 1:
+        image = np.expand_dims(image, -1)
     return image
 
 
@@ -84,7 +86,7 @@ def detect_image(image, yolo, all_classes):
     # Returns:
         image: processed image.
     """
-    pimage = process_image(image)
+    pimage = process_image(image, yolo.yolo_input_shape)
 
     start = time.time()
     boxes, classes, scores = yolo.predict(pimage, image.shape)
@@ -124,6 +126,10 @@ def detect_video(video, yolo, all_classes):
         if not res:
             break
 
+        if yolo.yolo_input_shape[-1] == 1:
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            frame = np.expand_dims(frame, -1)
+
         image = detect_image(frame, yolo, all_classes)
         cv2.imshow("detection", image)
 
@@ -131,7 +137,7 @@ def detect_video(video, yolo, all_classes):
         vout.write(image)
 
         if cv2.waitKey(110) & 0xff == 27:
-                break
+            break
 
     vout.release()
     camera.release()
@@ -149,6 +155,9 @@ if __name__ == '__main__':
                 print(f)
                 path = os.path.join(root, f)
                 image = cv2.imread(path)
+                if yolo.yolo_input_shape[-1] == 1:
+                    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+                    image = np.expand_dims(image,-1)
                 image = detect_image(image, yolo, all_classes)
                 cv2.imwrite('images/res/' + f, image)
 

@@ -96,11 +96,12 @@ def _main(args):
     else:
         image_height = int(cfg_parser['net_0']['height'])
         image_width = int(cfg_parser['net_0']['width'])
+        image_channels = int(cfg_parser['net_0']['channels'])
 
     # Darknet Check3
     # TODO: modify input channel
     # if input channel = 1 -> prev_layer = Input(shape=(image_height, image_width, 1))
-    prev_layer = Input(shape=(image_height, image_width, 3))
+    prev_layer = Input(shape=(image_height, image_width, image_channels))
     all_layers = [prev_layer]
     outputs = []
 
