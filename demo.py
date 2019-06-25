@@ -147,7 +147,11 @@ def detect_video(video, yolo, all_classes):
     
 
 if __name__ == '__main__':
-    yolo = YOLO(0.6, 0.5)
+    # For nms (Demo setting):
+    # https://github.com/AlexeyAB/darknet/blob/5ec35922d5215e11466a9bb1602f81d1746ccbe5/src/demo.c#L211
+    # For threshold:
+    # https://github.com/AlexeyAB/darknet/blob/5ec35922d5215e11466a9bb1602f81d1746ccbe5/src/detector.c#L1435
+    yolo = YOLO(obj_threshold=0.25, nms_threshold=0.45)
     file = 'data/coco_classes.txt'
     all_classes = get_classes(file)
 

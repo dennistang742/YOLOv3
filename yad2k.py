@@ -298,6 +298,7 @@ def _main(args):
                                                        remaining_weights))
     if remaining_weights > 0:
         print('Warning: {} unused weights'.format(remaining_weights))
+        assert False
 
     plot(model, to_file='{}.png'.format(output_root), show_shapes=True)
     print('Saved model plot to {}.png'.format(output_root))
