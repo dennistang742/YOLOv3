@@ -22,6 +22,11 @@ from keras.models import Model
 from keras.regularizers import l2
 from keras.utils.vis_utils import plot_model as plot
 
+import tensorflow as tf
+
+# GPU controlling setting
+config = tf.ConfigProto(device_count={'GPU': 1})
+sess = tf.Session(config=config)
 
 parser = argparse.ArgumentParser(
     description='Yet Another Darknet To Keras Converter.')
@@ -76,10 +81,14 @@ def _main(args):
     # Load weights and config.
     print('Loading weights.')
     weights_file = open(weights_path, 'rb')
-    # Darknet Check1
-    # TODO: modify weights_header, in-house model always "seen 32"
+
     # if darknet print "seen 32" -> weights_header = np.ndarray(shape=(4, ), dtype='int32', buffer=weights_file.read(16))
     # if darknet print "seen 64" -> weights_header = np.ndarray(shape=(5, ), dtype='int32', buffer=weights_file.read(20))
+    # ref:
+    # https://github.com/pjreddie/darknet/blob/61c9d02ec461e30d55762ec7669d6a1d3c356fb2/src/parser.c
+    # https://github.com/AlexeyAB/darknet/commit/1cbdd293f305607a487e184c2875de6a10c133cb
+    # https://github.com/AlexeyAB/darknet/blob/c9129c207823a96f0a1b3a840883a6c510073347/src/parser.c , line 1148
+
     weights_header = np.ndarray(shape=(4, ), dtype='int32', buffer=weights_file.read(16))
     print('Weights Header: ', weights_header)
     # TODO: Check transpose flag when implementing fully connected layers.
@@ -98,9 +107,6 @@ def _main(args):
         image_width = int(cfg_parser['net_0']['width'])
         image_channels = int(cfg_parser['net_0']['channels'])
 
-    # Darknet Check3
-    # TODO: modify input channel
-    # if input channel = 1 -> prev_layer = Input(shape=(image_height, image_width, 1))
     prev_layer = Input(shape=(image_height, image_width, image_channels))
     all_layers = [prev_layer]
     outputs = []
@@ -225,10 +231,10 @@ def _main(args):
 
         elif section.startswith('route'):
             ids = [int(i) for i in cfg_parser[section]['layers'].split(',')]
-            if len(ids) == 2:
-                for i, item in enumerate(ids):
-                    if item != -1:
-                        ids[i] = item + 1
+
+            for i, item in enumerate(ids):
+                if item > 0:
+                    ids[i] = item + 1
 
             layers = [all_layers[i] for i in ids]
 

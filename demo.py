@@ -94,6 +94,9 @@ def detect_image(image, yolo, all_classes):
 
     print('time: {0:.2f}s'.format(end - start))
 
+    if yolo.yolo_input_shape[-1] == 1:
+        image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
+
     if boxes is not None:
         draw(image, boxes, scores, classes, all_classes)
 
