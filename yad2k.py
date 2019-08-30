@@ -272,8 +272,8 @@ def _main(args):
             # num = int(cfg_parser[section]['num'])
             # mask = int(cfg_parser[section]['mask'])
             n1, n2 = int(prev_layer.shape[1]), int(prev_layer.shape[2])
-            n3 = 3
             n4 = (4 + 1 + classes)
+            n3 = int(int(prev_layer.shape[-1]) / n4)
             yolo = Reshape((n1, n2, n3, n4))(prev_layer)
             all_layers.append(yolo)
             prev_layer = all_layers[-1]
